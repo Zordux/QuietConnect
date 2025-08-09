@@ -29,7 +29,7 @@ It demonstrates:
 
 ## 🛠 Components
 
-- **`c2_server/`** → Flask-based C2 server with a live dashboard. 
+- **`c2_server/`** → NodeJS C2 server with a live React dashboard. 
 - **`payloads/`** → Example client payload and payload loader (PowerShell & C#) for lab testing.
 
 ---
