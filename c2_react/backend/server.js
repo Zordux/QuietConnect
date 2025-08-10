@@ -103,7 +103,6 @@ app.post("/send_screenshot", (req, res) => {
 
   const scriptPath = path.join(__dirname, "programs", "screenshot", "Screenshot.ps1");
 
-  let command;
   try {
     command = fs.readFileSync(scriptPath, "utf8");
   } catch (err) {
