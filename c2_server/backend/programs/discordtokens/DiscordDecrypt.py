@@ -5,6 +5,8 @@ Decrypts all tokens found by the PowerShell extraction script
 """
 
 import json
+import os
+import sys
 import base64
 from datetime import datetime
 
@@ -73,24 +75,18 @@ def main():
     print("🔐 Discord Token Decryptor - JSON Reader")
     print("=" * 60)
     
-    # Read the JSON file created by PowerShell (handle UTF-8 BOM)
+    if len(sys.argv) < 2:
+        print("[!] ERROR: No input provided as argument.")
+        sys.exit(1)
+
+    # Parse the JSON string passed as the command-line argument
     try:
-        # Try utf-8-sig first to handle BOM, then fallback to utf-8
-        try:
-            with open('discord_tokens.json', 'r', encoding='utf-8-sig') as f:
-                data = json.load(f)
-        except UnicodeDecodeError:
-            with open('discord_tokens.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-    except FileNotFoundError:
-        print("❌ Error: discord_tokens.json not found!")
-        print("   Run the PowerShell extraction script first: DiscordExtract.ps1")
-        return
+        data = json.loads(sys.argv[1])
     except json.JSONDecodeError as e:
-        print(f"❌ Error reading JSON file: {e}")
-        print("   The JSON file might be corrupted. Try running the PowerShell script again.")
-        return
-    
+        print(f"[!] ERROR: Failed to parse JSON input: {e}")
+        sys.exit(1)
+
+
     # Display extraction info
     info = data.get('extraction_info', {})
     print(f"📁 Extraction Info:")
