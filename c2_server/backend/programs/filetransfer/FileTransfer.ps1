@@ -1,5 +1,5 @@
 powershell -Command {
   Write-Host "---Start-Data---"
-  [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\Users\computer2\Desktop\Decode_Screenshot.ps1"))
+  [Convert]::ToBase64String([IO.File]::ReadAllBytes("WANTED\DIRECTORY\HERE"))
   Write-Host "---End-Data---"
 }
