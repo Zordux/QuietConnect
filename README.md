@@ -1,5 +1,5 @@
 # QuietConnect
-![quietconnect](https://github.com/user-attachments/assets/487603b9-415c-45ae-9d75-cb7678c4fa41)
+https://github.com/user-attachments/assets/8a895f3e-14e7-48f3-a791-03ff474009c1
 
 > **Silent Command & Control for Research Labs**  
 > A research-focused Command & Control (C2) framework for cybersecurity education, malware analysis training, and red team simulation in controlled environments.
