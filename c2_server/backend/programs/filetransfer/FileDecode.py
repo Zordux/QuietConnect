@@ -2,6 +2,8 @@ import os
 import sys
 import base64
 
+# TODO: Modify Filetransfer.ps1 to have a header including program / file name.
+
 # get base64 input from command-line argument
 if len(sys.argv) < 2:
     print("[!] ERROR: No Base64 input provided as argument.")
@@ -15,13 +17,14 @@ data_lines = []
 
 for line in lines:
     stripped = line.strip()
-    if stripped in ("---Start-Data---", "---End-Data---", "---Chunk-Start---", "---Chunk-End---"):
+    if stripped in ("---Start-Data---", "---End-Data---") 
         continue
     data_lines.append(stripped)
 
 base64_data = ''.join(data_lines)
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
+                                                            # replace photo.png with header
 output_path = os.path.join(script_dir, "..", "..", "clients", "photo.png")
 output_path = os.path.normpath(output_path)  
 
@@ -36,4 +39,4 @@ except Exception as e:
 with open(output_path, "wb") as file:
     file.write(raw_data)
 
-print(f"[*] Screenshot saved successfully to: {output_path}")
+print(f"[*] Screenshot transferred successfully to: {output_path}")

