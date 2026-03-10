@@ -1,11 +1,12 @@
 # QuietConnect
+![quietconnect](https://github.com/user-attachments/assets/487603b9-415c-45ae-9d75-cb7678c4fa41)
 
 > **Silent Command & Control for Research Labs**  
 > A research-focused Command & Control (C2) framework for cybersecurity education, malware analysis training, and red team simulation in controlled environments.
 
 ---
 
-## ⚠️ Disclaimer
+## DISCLAIMER
 
 **QuietConnect** is intended **solely for educational and research purposes** in authorized environments.  
 The authors and contributors **do not condone, encourage, or take responsibility for any malicious use** of this code.
@@ -17,7 +18,7 @@ By using this project, you agree that:
 
 ---
 
-## 📚 Overview
+## Overview
 
 **QuietConnect** simulates a C2 (Command & Control) architecture for learning and security research.  
 It demonstrates:
@@ -27,14 +28,14 @@ It demonstrates:
 
 ---
 
-## 🛠 Components
+## Components
 
 - **`c2_server/`** → NodeJS C2 server with a live React dashboard. 
 - **`payloads/`** → Example client payload and payload loader (PowerShell & C#) for lab testing.
 
 ---
 
-## 💡 Planned Changes & Ideas
+## Planned Changes & Ideas
 
 We are actively working on improving **QuietConnect** and adding new research capabilities:   
 - **Improved Dashboard UI** → Add filtering, search, and per-client command history.
@@ -44,7 +45,7 @@ We are actively working on improving **QuietConnect** and adding new research ca
 - **Pluggable Modules** → Enable easy creation of custom commands or tests without editing core code.
 
 ---
-## 🔒 Safety Guidelines
+## Safety Guidelines
 
 - Run **only** inside a **segmented lab network**.
 - Never connect lab payloads to public-facing IPs/domains.
@@ -53,7 +54,7 @@ We are actively working on improving **QuietConnect** and adding new research ca
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).  
 Provided **"as is"** without warranty of any kind.  
